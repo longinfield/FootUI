@@ -86,6 +86,7 @@ public class ClickDetector {
         downFrames = upFrames = 0;
         lastUpFrame = lastDownFrame = -1;
         downDist = upDist = 0;
+        movingAvePoint = null;
         ellipseTrace.clear();
         pointTrace.clear();
     }

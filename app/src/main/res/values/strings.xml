@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">FootInputDemo</string>
     <string name="calibrate_text">Calibrate</string>
-    <string name="calibrated_text">Calibration Finished</string>
+    <string name="calibrated_text">Stop</string>
 </resources>
