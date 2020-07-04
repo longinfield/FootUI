@@ -3762,7 +3762,6 @@ public class Core {
         gemm_1(src1.nativeObj, src2.nativeObj, alpha, src3.nativeObj, beta, dst.nativeObj);
     }
 
-
     //
     // C++:  void cv::hconcat(vector_Mat src, Mat& dst)
     //

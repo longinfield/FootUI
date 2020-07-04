@@ -27,61 +27,78 @@ public class FootState2Operation {
         this.listener = listener;
     }
 
-    public void checkFootState(FootState state, Point leftPoint, Point rightPoint) {
-        Log.i("footdemo", state.toString());
-        if (state.isTouching()) {
-            if (state.isLeaningLeft(state.left) && state.isLeaningRight(state.right)) {
+    public void checkFootState(FootState state) {
+        PointMotionDetector leftFinger = state.left.finger.motionDetector;
+        PointMotionDetector rightFinger = state.right.finger.motionDetector;
+        Point rightPoint = state.right.finger.smoothedPos;
+
+        if (state.isFeetNear()) {
+            boolean upperTouched = state.isPointNear(state.left.finger.position, state.right.finger.position);
+            boolean lowerTouched = state.isPointNear(state.left.bottom.position, state.right.bottom.position);
+            if (upperTouched && lowerTouched) {
+                // App Switch = Double foot touch
+                listener.onAppSwitch();
+                state.clearAllDetection(1000);
+            }
+            if (!upperTouched && lowerTouched) {
                 // Screenshot = Double foot lower touch
                 listener.onScreenshot();
-            } else if (state.isLeaningRight(state.left) && state.isLeaningLeft(state.right)) {
+                state.clearAllDetection(1000);
+            }
+            if (upperTouched && !lowerTouched) {
                 // Home = Double foot upper touch
                 listener.onHome();
-            } else {
-                // Double foot touch
-                listener.onAppSwitch();
+                state.clearAllDetection(1000);
             }
         } else {
-            if (state.isLeaningLeft(state.left)) {
-                if (state.isLeaningLeft(state.right)) {
+            if (state.left.isLeaningLeft()) {
+                if (state.right.isLeaningLeft()) {
                     // Flip Screen Left = Both foot left
                     listener.onFlipScreenLeft();
-                } else if (state.isLeaningRight(state.right)) {
-                    // Easy Access = Left foot left + Right foot right + foot separating (might confuse with Screenshot)
-                    if (state.isSeparating()) {
-                        listener.onEasyAccess();
-                    }
-                } else if (state.isStatic(state.right)) {
+                    state.clearAllDetection(500);
+                } else if (state.right.isLeaningRight()) {
+                    // Easy Access = Left foot left + Right foot right
+                    listener.onEasyAccess();
+                    state.clearAllDetection(500);
+                } else if (rightFinger.isStatic) {
                     // Back = Left foot left + Right foot static
                     listener.onBack();
+                    state.clearAllDetection(500);
                 }
-            } else if (state.isLeaningRight(state.left)) {
-                if (state.isLeaningRight(state.right)) {
+            } else if (state.left.isLeaningRight()) {
+                if (state.right.isLeaningRight()) {
                     // Flip Screen Right = Both foot right
                     listener.onFlipScreenRight();
+                    state.clearClickDetection();
                 }
-            } else if (state.isLifting(state.left)) {
-                if (state.isLifting(state.right)) {
-                    // Volume = Left foot lift + Right foot lift
-                    listener.onVolume();
-                } else if (state.isStatic(state.right)) {
-                    // Shortcut Menu = Left foot lift + Right foot static
-                    listener.onShortCutMenu();
+            } else if (leftFinger.isClicking) {
+                if (rightFinger.isClicking) {
+                    // Notice = Left foot click + Right foot click
+                    listener.onNotice();
+                    state.clearAllDetection(300);
+                } else if (!rightFinger.isReadyToClick) {
+                    // Trigger = Left foot click + Right foot static
+                    listener.onTrigger(rightPoint);
+//                    state.clearClickDetection();
+                    state.clearAllDetection(300);
                 }
-            } else if (state.isPressing(state.left)) {
-                if (state.isStatic(state.right)) {
+            } else if (leftFinger.isLongPressing) {
+                if (rightFinger.isStatic) {
                     // Long Touch = Left foot press + Right foot static
                     listener.onLongTouch(rightPoint);
                 } else {
                     // Drag = Left foot press + Right foot pointing
                     listener.onDrag(rightPoint);
                 }
-            } else if (state.isClicking(state.left)) {
-                if (state.isClicking(state.right)) {
-                    // Notice = Left foot click + Right foot click
-                    listener.onNotice();
-                } else if (state.isStatic(state.right)) {
-                    // Trigger = Left foot click + Right foot static
-                    listener.onTrigger(rightPoint);
+            } else if (leftFinger.isMovingUp) {
+                if (rightFinger.isMovingUp) {
+                    // Volume = Left foot lift + Right foot lift
+                    listener.onVolume();
+                    state.clearClickDetection();
+                } else if (rightFinger.isStatic && !rightFinger.isInstantlyMovingUp) {
+                    // Shortcut Menu = Left foot lift + Right foot static
+                    listener.onShortCutMenu();
+                    state.clearClickDetection(1000);
                 }
             } else {
                 listener.onPointing(rightPoint);

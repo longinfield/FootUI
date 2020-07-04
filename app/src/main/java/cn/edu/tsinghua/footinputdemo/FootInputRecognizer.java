@@ -1,6 +1,7 @@
 package cn.edu.tsinghua.footinputdemo;
 
 import android.util.Log;
+import android.util.Pair;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -35,6 +36,7 @@ public class FootInputRecognizer {
     public FootInputRecognizer() {
         skinColorRecognizer = new SkinColorRecognizer();
         gestureDetector = new GestureDetector();
+        gestureDetector.setFootOperationListener(gestureDetector);
         need_calibration = true;
     }
 
@@ -56,7 +58,7 @@ public class FootInputRecognizer {
         return frame;
     }
 
-    private List<MatOfPoint> generateContours(Mat frame) {
+    private List<Pair<Double, MatOfPoint>> generateContours(Mat frame) {
         Imgproc.GaussianBlur(frame, frame, new Size(5,5), 0, 0);
         Mat mask = skinColorRecognizer.maskFrame(frame);
         Mat kernel = Mat.ones(5,5, CvType.CV_8U);
@@ -67,19 +69,21 @@ public class FootInputRecognizer {
         Mat hierarchy = new Mat();
         Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        List<MatOfPoint> validContours = new ArrayList<>();
+
+        List<Pair<Double, MatOfPoint>> validContours = new ArrayList<>();
         for (Iterator<MatOfPoint> i = contours.iterator(); i.hasNext(); ) {
             MatOfPoint contour = i.next();
-            if (Imgproc.contourArea(contour) > necessaryContourArea) {
-                validContours.add(contour);
+            Double area = Imgproc.contourArea(contour);
+            if (area > necessaryContourArea) {
+                validContours.add(new Pair<>(area, contour));
             }
         }
 
         if (validContours.size() > 2) {
-            Collections.sort(validContours, new Comparator<MatOfPoint>() {
+            Collections.sort(validContours, new Comparator<Pair<Double, MatOfPoint>>() {
                 @Override
-                public int compare(MatOfPoint o1, MatOfPoint o2) {
-                    double areaDiff = Imgproc.contourArea(o1) - Imgproc.contourArea(o2);
+                public int compare(Pair<Double, MatOfPoint> o1, Pair<Double, MatOfPoint> o2) {
+                    Double areaDiff = o1.first - o2.first;
                     if (areaDiff < -0.00001) {
                         return 1;
                     } else if (areaDiff > 0.00001) {
@@ -104,7 +108,7 @@ public class FootInputRecognizer {
 
         Mat frameSubMat = frame.submat(detect_area[0], detect_area[1], detect_area[2], detect_area[3]);
         Mat roi = frameSubMat.clone();
-        List<MatOfPoint> contours = generateContours(roi);
+        List<Pair<Double, MatOfPoint>> contours = generateContours(roi);
         roi = gestureDetector.processFrame(roi, contours);
         roi.copyTo(frameSubMat);
         return frame;

@@ -1,11 +1,12 @@
 package cn.edu.tsinghua.footinputdemo;
 
-import android.util.Log;
+import android.util.Pair;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -14,7 +15,6 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 public class GestureDetector implements FootState2Operation.FootOperationListener {
@@ -23,6 +23,9 @@ public class GestureDetector implements FootState2Operation.FootOperationListene
         public Point center;
         public Point mainDir;
         public Size size;
+        public Point finger;
+        public Point bottom;
+        public Rect boundingBox;
 
         public FootEllipse(Point center, Point mainDir, Size size) {
             this.center = center;
@@ -33,18 +36,15 @@ public class GestureDetector implements FootState2Operation.FootOperationListene
 
     private FootState2Operation operation;
     private FootEllipse prevEllipseL, prevEllipseR;
-    private Point prevPointL, prevPointR;
     private Mat tempFrame;
-    private PointerMotionDetector motionDetectorL, motionDetectorR;
-    private ClickDetector clickDetectorL, clickDetectorR;
+    private FootState footState;
 
     public GestureDetector() {
         prevEllipseL = prevEllipseR = null;
-        operation = new FootState2Operation(this);
-        motionDetectorL = new PointerMotionDetector();
-        motionDetectorR = new PointerMotionDetector();
-        clickDetectorL = new ClickDetector();
-        clickDetectorR = new ClickDetector();
+    }
+
+    public void setFootOperationListener(FootState2Operation.FootOperationListener listener) {
+        operation = new FootState2Operation(listener);
     }
 
     private double distToEllipse(Point p, FootEllipse rect) {
@@ -73,11 +73,11 @@ public class GestureDetector implements FootState2Operation.FootOperationListene
         return true;
     }
 
-    private FootEllipse contourToFootEllipse(RotatedRect fit_ellipse) {
+    private FootEllipse contourToFootEllipse(RotatedRect fit_ellipse, MatOfPoint2f contour, boolean isLeft) {
         Point center = fit_ellipse.center;
-        Size size = fit_ellipse.size, footSize = null;
+        Size size = fit_ellipse.size, footSize;
         double angle = fit_ellipse.angle;
-        Point mainDir = null;
+        Point mainDir;
         if (size.width > size.height) {
             angle = Math.toRadians(angle);
             mainDir = new Point(Math.cos(angle), -Math.sin(angle));
@@ -88,14 +88,24 @@ public class GestureDetector implements FootState2Operation.FootOperationListene
             mainDir = new Point(Math.sin(angle), -Math.cos(angle));
             footSize = size;
         }
+        FootEllipse footEllipse = new FootEllipse(center, mainDir, footSize);
+        footEllipse = analyzeFingerPoint(footEllipse, contour, isLeft);
 
-        return new FootEllipse(center, mainDir, footSize);
+        footEllipse.boundingBox = Imgproc.boundingRect(contour);
+        return footEllipse;
     }
 
-    private Point analyzeFingerPoint(FootEllipse ellipse, MatOfPoint2f contour) {
-        double maxDist = Double.NEGATIVE_INFINITY;
-        Point fingerPoint = null;
+    private FootEllipse analyzeFingerPoint(FootEllipse ellipse, MatOfPoint2f contour, boolean isLeft) {
+        double maxDist = Double.NEGATIVE_INFINITY, minDist = Double.POSITIVE_INFINITY;
+        Point fingerPoint = null, bottomPoint = null;
         List<Point> contourPoints = contour.toList();
+        Point subDir;
+        if (isLeft) {
+            subDir = new Point(ellipse.mainDir.y, -ellipse.mainDir.x);
+        } else {
+            subDir = new Point(-ellipse.mainDir.y, ellipse.mainDir.x);
+        }
+
         for (Iterator<Point> iter = contourPoints.iterator(); iter.hasNext(); ) {
             Point p = iter.next();
             Point diff = new Point(p.x - ellipse.center.x, p.y - ellipse.center.y);
@@ -104,67 +114,33 @@ public class GestureDetector implements FootState2Operation.FootOperationListene
                 maxDist = dist;
                 fingerPoint = p;
             }
+
+            double distBottom = ellipse.mainDir.dot(diff) + subDir.dot(diff);
+            if (distBottom < minDist) {
+                minDist = distBottom;
+                bottomPoint = p;
+            }
         }
-        return fingerPoint;
+
+        ellipse.finger = fingerPoint;
+        ellipse.bottom = bottomPoint;
+        return ellipse;
     }
 
-    private FootState footEllipse2FootState(FootEllipse ellipseL, FootEllipse ellipseR, Point fingerPointL, Point fingerPointR, boolean feet_touched) {
-        FootState state = new FootState();
-        state.leftPoint = ellipseL.center;
-        state.rightPoint = ellipseR.center;
+    private void updateFootState(FootEllipse ellipseL, FootEllipse ellipseR, boolean touched) {
+        if (footState == null) {
+            footState = new FootState();
+            footState.setFootSize(new Size((ellipseL.size.width + ellipseR.size.width) / 2,
+                    (ellipseL.size.height + ellipseR.size.height) / 2));
+        }
+        footState.left.angle = Math.toDegrees(Math.atan2(-ellipseL.mainDir.y, ellipseL.mainDir.x));
+        footState.right.angle = Math.toDegrees(Math.atan2(-ellipseR.mainDir.y, ellipseR.mainDir.x));
+        footState.left.boundingBox = ellipseL.boundingBox;
+        footState.right.boundingBox = ellipseR.boundingBox;
 
-        if (feet_touched) {
-            state.both |= FootState.IS_TOUCHING;
-        }
-        if (prevPointL != null && state.leftPoint.x > prevPointL.x && state.rightPoint.x < prevPointR.x) {
-            state.both |= FootState.IS_APPROACHING;
-        }
-        if (prevPointL != null && state.leftPoint.x < prevPointL.x && state.rightPoint.x > prevPointR.x) {
-            state.both |= FootState.IS_SEPARATING;
-        }
-
-        // 1. detect leaning left & right
-        double angle_l = Math.toDegrees(Math.atan2(-ellipseL.mainDir.y, ellipseL.mainDir.x));
-        if (angle_l > 100) {
-            state.left |= FootState.IS_LEANING_LEFT;
-        }
-        if (angle_l < 70){
-            state.left |= FootState.IS_LEANING_RIGHT;
-        }
-
-        double angle_r = Math.toDegrees(Math.atan2(-ellipseR.mainDir.y, ellipseR.mainDir.x));
-        if (angle_r > 110) {
-            state.right |= FootState.IS_LEANING_LEFT;
-        }
-        if (angle_r < 80){
-            state.right |= FootState.IS_LEANING_RIGHT;
-        }
-
-        // 2. detect lifting / static
-        motionDetectorL.addPoint(state.leftPoint);
-        motionDetectorR.addPoint(state.rightPoint);
-        if (motionDetectorL.isLifting())
-            state.left |= FootState.IS_LIFTING;
-        if (motionDetectorL.isStatic())
-            state.left |= FootState.IS_STATIC;
-        if (motionDetectorR.isLifting())
-            state.right |= FootState.IS_LIFTING;
-        if (motionDetectorR.isStatic())
-            state.right |= FootState.IS_STATIC;
-
-        // 3. detect pressing / clicking
-        clickDetectorL.addState(ellipseL, fingerPointL);
-        clickDetectorR.addState(ellipseR, fingerPointR);
-        if (clickDetectorL.isPressing())
-            state.left |= FootState.IS_PRESSING;
-        if (clickDetectorL.isClicking())
-            state.left |= FootState.IS_CLICKING;
-        if (clickDetectorR.isPressing())
-            state.right |= FootState.IS_PRESSING;
-        if (clickDetectorR.isClicking())
-            state.right |= FootState.IS_CLICKING;
-
-        return state;
+        Point[] leftPoints = {ellipseL.center, ellipseL.finger, ellipseL.bottom};
+        Point[] rightPoints = {ellipseR.center, ellipseR.finger, ellipseR.bottom};
+        footState.update(System.currentTimeMillis(), leftPoints, rightPoints, touched);
     }
 
     private void renderFrame(Mat frame, MatOfPoint2f cont_l, MatOfPoint2f cont_r, RotatedRect ellipse_l, RotatedRect ellipse_r, Point finger_point_l, Point finger_point_r, FootState state) {
@@ -172,20 +148,26 @@ public class GestureDetector implements FootState2Operation.FootOperationListene
         Imgproc.drawContours(frame, cont, -1, new Scalar(0, 127, 0));
         Imgproc.ellipse(frame, ellipse_l, new Scalar(0, 0, 255));
         Imgproc.ellipse(frame, ellipse_r, new Scalar(0, 0, 255));
-        Imgproc.circle(frame, finger_point_l, 5, new Scalar(255, 0, 0));
-        Imgproc.circle(frame, finger_point_r, 5, new Scalar(255, 0, 0));
+        Imgproc.circle(frame, finger_point_l, 10, new Scalar(255, 0, 0));
+        Imgproc.circle(frame, finger_point_r, 10, new Scalar(255, 0, 0));
+        Imgproc.circle(frame, state.left.finger.smoothedPos, 10, new Scalar(255, 255, 255));
+        Imgproc.circle(frame, state.right.finger.smoothedPos, 10, new Scalar(255, 255, 255));
+        Imgproc.circle(frame, state.left.bottom.smoothedPos, 10, new Scalar(255, 255, 255));
+        Imgproc.circle(frame, state.right.bottom.smoothedPos, 10, new Scalar(255, 255, 255));
+        Imgproc.circle(frame, state.left.center.smoothedPos, 10, new Scalar(255, 255, 255));
+        Imgproc.circle(frame, state.right.center.smoothedPos, 10, new Scalar(255, 255, 255));
         tempFrame = frame;
-        operation.checkFootState(state, finger_point_l, finger_point_r);
-//        Imgproc.putText(frame, "l: " + pose_l + ", r: " + pose_r, new Point(20, 40), Imgproc.FONT_HERSHEY_COMPLEX, 1, new Scalar(0, 255, 0), 2);
+//        writeTextToTempFrame(String.valueOf(state.left.angle) + " " + String.valueOf(state.right.angle), 2);
+        operation.checkFootState(state);
     }
 
-    public Mat processFrame(Mat frame, List<MatOfPoint> contours) {
+    public Mat processFrame(Mat frame, List<Pair<Double, MatOfPoint>> contours) {
         RotatedRect rect_l, rect_r;
         MatOfPoint2f cont_l, cont_r;
-        boolean feet_touched = false;
+        boolean touched = false;
         if (contours.size() == 2) {
-            MatOfPoint2f cont0 = new MatOfPoint2f(contours.get(0).toArray());
-            MatOfPoint2f cont1 = new MatOfPoint2f(contours.get(1).toArray());
+            MatOfPoint2f cont0 = new MatOfPoint2f(contours.get(0).second.toArray());
+            MatOfPoint2f cont1 = new MatOfPoint2f(contours.get(1).second.toArray());
             RotatedRect rect0 = Imgproc.fitEllipse(cont0);
             RotatedRect rect1 = Imgproc.fitEllipse(cont1);
 
@@ -196,7 +178,7 @@ public class GestureDetector implements FootState2Operation.FootOperationListene
             }
         } else {
             if (contours.size() == 1) {
-                MatOfPoint2f contour = new MatOfPoint2f(contours.get(0).toArray());
+                MatOfPoint2f contour = new MatOfPoint2f(contours.get(0).second.toArray());
                 List<Point> cont_l_list = new ArrayList<>(), cont_r_list = new ArrayList<>();
                 if (splitContours(contour, cont_l_list, cont_r_list)) {
                     cont_l = new MatOfPoint2f();
@@ -205,7 +187,7 @@ public class GestureDetector implements FootState2Operation.FootOperationListene
                     cont_r.fromList(cont_r_list);
                     rect_l = Imgproc.fitEllipse(cont_l);
                     rect_r = Imgproc.fitEllipse(cont_r);
-                    feet_touched = true;
+                    touched = true;
                 } else {
                     prevEllipseL = prevEllipseR = null;
                     return frame;
@@ -216,27 +198,21 @@ public class GestureDetector implements FootState2Operation.FootOperationListene
             }
         }
 
-        FootEllipse ellipse_l = contourToFootEllipse(rect_l);
-        FootEllipse ellipse_r = contourToFootEllipse(rect_r);
+        FootEllipse ellipse_l = contourToFootEllipse(rect_l, cont_l, true);
+        FootEllipse ellipse_r = contourToFootEllipse(rect_r, cont_r, false);
         prevEllipseL = ellipse_l; prevEllipseR = ellipse_r;
-        Point finger_point_l = analyzeFingerPoint(ellipse_l, cont_l);
-        Point finger_point_r = analyzeFingerPoint(ellipse_r, cont_r);
 
-        FootState footState = footEllipse2FootState(ellipse_l, ellipse_r, finger_point_l, finger_point_r, feet_touched);
-
-        renderFrame(frame, cont_l, cont_r, rect_l, rect_r, finger_point_l, finger_point_r, footState);
-        prevPointL = rect_l.center;
-        prevPointR = rect_r.center;
+        updateFootState(ellipse_l, ellipse_r, touched);
+        renderFrame(frame, cont_l, cont_r, rect_l, rect_r, footState.left.finger.position, footState.right.finger.position, footState);
         return frame;
     }
 
     private void writeTextToTempFrame(String text) {
-        Imgproc.putText(tempFrame, text, new Point(20, 40), Imgproc.FONT_HERSHEY_COMPLEX, 1, new Scalar(0, 255, 0), 2);
+        writeTextToTempFrame(text, 0);
     }
 
-    private void clearClickDetector() {
-        clickDetectorL.clear(ClickDetector.BUFFER_FRAMES);
-        clickDetectorR.clear(ClickDetector.BUFFER_FRAMES);
+    private void writeTextToTempFrame(String text, int row) {
+        Imgproc.putText(tempFrame, text, new Point(20, 40 * (row+1)), Imgproc.FONT_HERSHEY_COMPLEX, 1, new Scalar(0, 255, 0), 2);
     }
 
     @Override
@@ -248,13 +224,11 @@ public class GestureDetector implements FootState2Operation.FootOperationListene
     @Override
     public void onAppSwitch() {
         writeTextToTempFrame("App Switch");
-
     }
 
     @Override
     public void onBack() {
         writeTextToTempFrame("Back");
-        clearClickDetector();
     }
 
     @Override
@@ -266,25 +240,21 @@ public class GestureDetector implements FootState2Operation.FootOperationListene
     @Override
     public void onEasyAccess() {
         writeTextToTempFrame("Easy Access");
-        clearClickDetector();
     }
 
     @Override
     public void onFlipScreenLeft() {
         writeTextToTempFrame("Flip Screen Left");
-        clearClickDetector();
     }
 
     @Override
     public void onFlipScreenRight() {
         writeTextToTempFrame("Flip Screen Right");
-        clearClickDetector();
     }
 
     @Override
     public void onHome() {
         writeTextToTempFrame("Home");
-        clearClickDetector();
     }
 
     @Override
@@ -301,13 +271,11 @@ public class GestureDetector implements FootState2Operation.FootOperationListene
     @Override
     public void onScreenshot() {
         writeTextToTempFrame("Screen Shot");
-        clearClickDetector();
     }
 
     @Override
     public void onShortCutMenu() {
         writeTextToTempFrame("Short Cut Menu");
-        clearClickDetector();
     }
 
     @Override
@@ -319,6 +287,5 @@ public class GestureDetector implements FootState2Operation.FootOperationListene
     @Override
     public void onVolume() {
         writeTextToTempFrame("Volume");
-        clearClickDetector();
     }
 }

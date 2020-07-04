@@ -104,6 +104,6 @@ public class ClickDetector {
     public boolean isClicking() {
         // Clicking, if the foot was pressed down and lift back within HOLD_FRAMES frames.
         // This signal will be kept for HOLD_FRAMES frames after that, unless clear() is called.
-        return (lastUpFrame > 0 && lastDownFrame > 0 && (lastUpFrame - lastDownFrame < HOLD_FRAMES) && (frameCount - lastUpFrame < HOLD_FRAMES));
+        return (lastUpFrame > lastDownFrame && lastDownFrame > 0 && (lastUpFrame - lastDownFrame < HOLD_FRAMES) && (frameCount - lastUpFrame < HOLD_FRAMES));
     }
 }
