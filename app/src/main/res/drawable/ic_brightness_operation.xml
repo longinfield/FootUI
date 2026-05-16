@@ -1,0 +1,30 @@
+<vector android:height="25dp" android:viewportHeight="23"
+    android:viewportWidth="23" android:width="25dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="#00000000" android:fillType="evenOdd"
+        android:pathData="M11.5,11.5m-5.5,0a5.5,5.5 0,1 1,11 0a5.5,5.5 0,1 1,-11 0"
+        android:strokeColor="#01BFBA" android:strokeWidth="1"/>
+    <path android:fillColor="#00000000" android:fillType="evenOdd"
+        android:pathData="M11.4539,1L11.4539,3.2537"
+        android:strokeColor="#01BFBA" android:strokeLineCap="round" android:strokeWidth="1"/>
+    <path android:fillColor="#00000000" android:fillType="evenOdd"
+        android:pathData="M17.4632,5.5239L19.1133,3.9361"
+        android:strokeColor="#01BFBA" android:strokeLineCap="round" android:strokeWidth="1"/>
+    <path android:fillColor="#00000000" android:fillType="evenOdd"
+        android:pathData="M19.7191,11.4084L22.0091,11.4084"
+        android:strokeColor="#01BFBA" android:strokeLineCap="round" android:strokeWidth="1"/>
+    <path android:fillColor="#00000000" android:fillType="evenOdd"
+        android:pathData="M17.4632,17.5193L19.1523,19.07"
+        android:strokeColor="#01BFBA" android:strokeLineCap="round" android:strokeWidth="1"/>
+    <path android:fillColor="#00000000" android:fillType="evenOdd"
+        android:pathData="M11.4539,19.5943L11.4539,21.8843"
+        android:strokeColor="#01BFBA" android:strokeLineCap="round" android:strokeWidth="1"/>
+    <path android:fillColor="#00000000" android:fillType="evenOdd"
+        android:pathData="M3.8847,19.07L5.5328,17.48"
+        android:strokeColor="#01BFBA" android:strokeLineCap="round" android:strokeWidth="1"/>
+    <path android:fillColor="#00000000" android:fillType="evenOdd"
+        android:pathData="M0.7663,11.5021L3.0563,11.5021"
+        android:strokeColor="#01BFBA" android:strokeLineCap="round" android:strokeWidth="1"/>
+    <path android:fillColor="#00000000" android:fillType="evenOdd"
+        android:pathData="M3.8847,3.8986L5.5667,5.4527"
+        android:strokeColor="#01BFBA" android:strokeLineCap="round" android:strokeWidth="1"/>
+</vector>

@@ -2,4 +2,23 @@
     <string name="app_name">FootInputDemo</string>
     <string name="calibrate_text">Calibrate</string>
     <string name="calibrated_text">Stop</string>
+    <string name="permission_accessibility">打开「侧边栏」</string>
+    <string name="permission_accessibility_">请开启「侧边栏」权限~</string>
+    <string name="permission_flatwindow">打开「悬浮窗」</string>
+    <string name="permission_flatwindow_">请开启「悬浮窗」权限~</string>
+    <string name="simulate_click">模拟点击</string>
+    <string name="simulate_longtouch">模拟长按</string>
+    <string name="scrollup">上滑</string>
+    <string name="scrolldown">下滑</string>
+    <string name="brightness">亮度</string>
+    <string name="back">返回</string>
+    <string name="home">主页</string>
+    <string name="annotation">批注</string>
+    <string name="screenshot">截屏</string>
+    <string name="notice">通知</string>
+    <string name="volume">音量</string>
+    <string name="backstage">后台</string>
+    <string name="setting_modify_toast">调节系统亮度需要开启如下权限~</string>
+    <string name="permission_notice">所有权限都已打开</string>
+    <string name="accessibility_description">开启此功能打开光标</string>
 </resources>

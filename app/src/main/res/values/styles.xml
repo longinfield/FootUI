@@ -6,6 +6,81 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
     </style>
 
+    <style name="RootLayoutStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="LayoutStyle">
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_marginTop">3dp</item>
+        <item name="android:layout_marginBottom">3dp</item>
+        <item name="android:layout_marginRight">3dp</item>
+        <item name="android:layout_marginLeft">3dp</item>
+
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:paddingStart">5dp</item>
+        <item name="android:paddingEnd">5dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/selector_button</item>
+    </style>
+
+    <style name="GestureButtonStyle">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:textColor">@color/color_main</item>
+        <item name="android:textSize">@dimen/text_size</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">@dimen/text_padding_left_right</item>
+        <item name="android:paddingEnd">@dimen/text_padding_left_right</item>
+        <item name="android:paddingTop">@dimen/text_padding_top_bottom</item>
+        <item name="android:paddingBottom">@dimen/text_padding_top_bottom</item>
+        <item name="android:background">@drawable/gesture_selector_button</item>
+        <item name="android:textStyle">bold</item>
+        <!--<item name="android:color">@color/color_main</item>-->
+    </style>
+
+    <style name="ButtonStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:textColor">@color/color_main</item>
+        <item name="android:textSize">@dimen/text_size</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">@dimen/text_padding_left_right</item>
+        <item name="android:paddingEnd">@dimen/text_padding_left_right</item>
+        <item name="android:paddingTop">@dimen/text_padding_top_bottom</item>
+        <item name="android:paddingBottom">@dimen/text_padding_top_bottom</item>
+        <item name="android:background">@drawable/selector_button</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textStyle">bold</item>
+        <!--<item name="android:color">@color/color_main</item>-->
+    </style>
+
+    <style name="LeftSeekBarAnim" type="text/css">
+        <item name="android:windowEnterAnimation">@anim/bar_left_enter</item>
+        <item name="android:windowExitAnimation">@anim/bar_left_exit</item>
+    </style>
+
+    <style name="MainButtonStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:background">@drawable/ripple_bg_button</item>
+        <item name="elevation">5dp</item>
+        <item name="android:paddingLeft">30dp</item>
+        <item name="android:paddingRight">30dp</item>
+        <item name="android:paddingTop">7dp</item>
+        <item name="android:paddingBottom">7dp</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:visibility">gone</item>
+        <item name="android:layout_margin">5dp</item>
+    </style>
 </resources>

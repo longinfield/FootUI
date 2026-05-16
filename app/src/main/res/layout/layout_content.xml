@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/root"
+        android:visibility="visible"
+        style="@style/RootLayoutStyle">
+
+        <LinearLayout style="@style/LayoutStyle"
+            android:id="@+id/layout_back"
+            >
+
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/back"
+                style="@style/GestureButtonStyle"
+                android:src="@drawable/ic_back"/>
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_back"
+                style="@style/ButtonStyle"
+                android:drawableTop="@drawable/ic_back_operation"
+                android:text="@string/back" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/LayoutStyle"
+            android:id="@+id/layout_home">
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/home"
+                style="@style/GestureButtonStyle"
+                android:src="@drawable/ic_home" />
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_home"
+                style="@style/ButtonStyle"
+                android:drawableTop="@drawable/ic_home_operation"
+                android:text="@string/home" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/LayoutStyle"
+            android:id="@+id/layout_backstage">
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/backstage"
+                android:src="@drawable/ic_appswitch"
+                style="@style/GestureButtonStyle" />
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_backstage"
+                style="@style/ButtonStyle"
+                android:drawableTop="@drawable/ic_backstage_operation"
+                android:text="@string/backstage" />
+        </LinearLayout>
+
+
+        <LinearLayout style="@style/LayoutStyle"
+            android:id="@+id/layout_screenshot">
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/screenshot"
+                android:src="@drawable/ic_screenshot"
+                style="@style/GestureButtonStyle" />
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_screenshot"
+                style="@style/ButtonStyle"
+                android:drawableTop="@drawable/ic_screenshot_operation"
+                android:text="@string/screenshot" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/LayoutStyle"
+            android:id="@+id/layout_easyaccess">
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/easyaccess"
+                android:src="@drawable/ic_easyaccess"
+                style="@style/GestureButtonStyle" />
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_notice"
+                style="@style/ButtonStyle"
+                android:drawableTop="@drawable/ic_notice_operation"
+                android:text="@string/notice" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/LayoutStyle"
+            android:id="@+id/layout_brightness">
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/brightness"
+                android:src="@drawable/ic_brightness"
+                style="@style/GestureButtonStyle" />
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_brightness"
+                style="@style/ButtonStyle"
+                android:drawableTop="@drawable/ic_brightness_operation"
+                android:text="@string/brightness" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/LayoutStyle"
+            android:id="@+id/layout_volume">
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/volume"
+                android:src="@drawable/ic_volume"
+                style="@style/GestureButtonStyle" />
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_volume"
+                style="@style/ButtonStyle"
+                android:drawableTop="@drawable/ic_volume_operation"
+                android:text="@string/volume" />
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>

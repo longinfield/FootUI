@@ -1,7 +1,9 @@
 package cn.edu.tsinghua.footinputdemo;
 
+import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
+import android.view.WindowManager;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -32,12 +34,15 @@ public class FootInputRecognizer {
     private int[] calib_area_l;
     private int[] calib_area_r;
     private int necessaryContourArea;
+    public SideBarService msideBarService;
 
-    public FootInputRecognizer() {
+    public FootInputRecognizer(SideBarService sideBarService, int screenWidth, int screenHeight,int screenDensity, WindowManager windowManager, Context context) {
+        msideBarService=sideBarService;
         skinColorRecognizer = new SkinColorRecognizer();
-        gestureDetector = new GestureDetector();
+        gestureDetector = new GestureDetector(sideBarService,screenWidth,screenHeight,screenDensity,windowManager,context);
         gestureDetector.setFootOperationListener(gestureDetector);
         need_calibration = true;
+
     }
 
     public void setSize(int width, int height) {

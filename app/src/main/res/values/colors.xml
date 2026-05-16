@@ -3,4 +3,11 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="color_main">#01BFBA</color>
+    <color name="bg_gesture_button">#5D5D5D</color>
+    <color name="bg_button_normal">#505050</color>
+    <color name="bg_button_touch">#ffffff</color>
+    <color name="border_bar">#555f7f</color>
+    <color name="bg">#f6f7ff</color>
 </resources>

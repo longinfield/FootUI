@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/scrollUp"
+        android:src="@drawable/ic_expand_more_black_24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/scrollDown"
+        android:src="@drawable/ic_expand_less_black_24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!--<LinearLayout style="@style/LayoutStyle">
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/scrollUp"
+            style="@style/ButtonStyle"
+            android:drawableTop="@drawable/ic_expand_more_black_24dp"
+            android:text="@string/scrollup" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/LayoutStyle">
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/scrollDown"
+            style="@style/ButtonStyle"
+            android:drawableTop="@drawable/ic_expand_less_black_24dp"
+            android:text="@string/scrolldown" />
+    </LinearLayout>-->
+
+</LinearLayout>

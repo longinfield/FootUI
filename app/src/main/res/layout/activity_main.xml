@@ -6,7 +6,19 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <org.opencv.android.JavaCameraView
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/btn_flatwindow"
+        style="@style/MainButtonStyle"
+        android:onClick="goGetFlatWindow"
+        android:text="@string/permission_flatwindow" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/btn_accessibility"
+        style="@style/MainButtonStyle"
+        android:onClick="goGetAccessibility"
+        android:text="@string/permission_accessibility" />
+
+    <!--<org.opencv.android.JavaCameraView
         android:id="@+id/cameraView"
         android:layout_width="384dp"
         android:layout_height="442dp"
@@ -24,5 +36,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cameraView" />
+        app:layout_constraintTop_toBottomOf="@+id/cameraView" />-->
 </android.support.constraint.ConstraintLayout>
